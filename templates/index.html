@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sleep Disorder Prediction</title>
+    <link rel="icon" type="image/x-icon" href="artificial-intelligence.png">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous">
+    <style>
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        #loading-spinner {
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-5 pt-3">
+        <div class="card mx-auto" style="width: 30rem; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+            <div class="card-body">
+                <h1 class="card-title mb-4 text-center" style="color: #007bff; font-size: 42px;">Sleep Disorder
+                    Prediction</h1>
+                <form id="predict-form" action="http://localhost:5000/predict" method="post">
+                    <label for="gender" class="col-md-6">Gender:</label>
+                    <input type="radio" name="gender" value="Male" required checked> Male
+                    <input type="radio" name="gender" value="Female" required> Female<br>
+
+                    <label for="age" class="col-md-6">Age:</label>
+                    <input type="number" name="age" value="27" required><br>
+
+                    <label for="occupation" class="col-md-6">Occupation:</label>
+                    <select name="occupation" required>
+                        <option value="Software Engineer" selected>Software Engineer</option>
+                        <option value="Teacher">Teacher</option>
+                        <option value="Doctor">Doctor</option>
+                        <option value="Sales Representative">Sales Representative</option>
+                        <option value="Nurse">Nurse</option>
+                        <option value="Lawyer">Lawyer</option>
+                        <option value="Engineer">Engineer</option>
+                        <option value="Accountant">Accountant</option>
+                        <option value="Salesperson">Salesperson</option>
+                        <option value="Scientist">Scientist</option>
+                        <option value="Manager">Manager</option>
+                    </select><br>
+
+                    <label for="sleep_duration" class="col-md-6">Sleep Duration:</label>
+                    <input type="number" name="sleep_duration" step="0.1" value="6.1" required><br>
+
+                    <label for="quality_of_sleep" class="col-md-6">Quality of Sleep:</label>
+                    <input type="number" name="quality_of_sleep" value="6" required><br>
+
+                    <label for="physical_activity_level" class="col-md-6">Physical Activity Level:</label>
+                    <input type="number" name="physical_activity_level" value="42" required><br>
+
+                    <label for="stress_level" class="col-md-6">Stress Level:</label>
+                    <input type="number" name="stress_level" value="6" required><br>
+
+                    <label for="bmi_category" class="col-md-6">BMI Category:</label>
+                    <select name="bmi_category" required>
+                        <option value="Normal Weight">Normal Weight</option>
+                        <option value="Normal">Normal</option>
+                        <option value="Overweight" selected>Overweight</option>
+                        <option value="Obese">Obese</option>
+                    </select><br>
+
+                    <label for="blood_pressure" class="col-md-6">Blood Pressure:</label>
+                    <input type="text" name="blood_pressure" value="126/83" required><br>
+
+                    <label for="heart_rate" class="col-md-6">Heart Rate:</label>
+                    <input type="number" name="heart_rate" value="77" required><br>
+
+                    <label for="daily_steps" class="col-md-6">Daily Steps:</label>
+                    <input type="number" name="daily_steps" value="4200" required><br>
+
+                    <input type="submit" class="btn btn-primary btn-block mt-3" value="Predict"
+                        style="background-color: #007bff;">
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+    <div id="loading-overlay">
+        <div id="loading-spinner"></div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var predictForm = document.getElementById('predict-form');
+            var loadingOverlay = document.getElementById('loading-overlay');
+    
+            predictForm.addEventListener('submit', function () {
+                showLoading();
+                setTimeout(function () {
+                    hideLoadingAndRedirect();
+                }, 2000);
+            });
+    
+            function showLoading() {
+                loadingOverlay.style.display = 'flex';
+            }
+    
+            function hideLoadingAndRedirect() {
+                loadingOverlay.style.display = 'none';
+            }
+        });
+    </script>
+    
+
+</body>
+
+</html>
